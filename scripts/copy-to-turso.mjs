@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Copy everything from the local database (~/.comment-picker/picker.db) into Turso, once, before going live.
 //   TURSO_DATABASE_URL=libsql://... TURSO_AUTH_TOKEN=... node scripts/copy-to-turso.mjs
-// Run it against an empty Turso database: open the deployed app once first (that creates the tables),
-// and don't create contests there before copying. Rows with the same id are overwritten.
+// Run it against an empty Turso database (don't create contests there before copying).
+// Tables are created from the local database's own definitions. Rows with the same id are overwritten.
 import { createClient } from "@libsql/client";
 import os from "node:os";
 import path from "node:path";
@@ -19,10 +19,16 @@ const remote = createClient({ url: process.env.TURSO_DATABASE_URL, authToken: pr
 const TABLES = ["settings", "contests", "comments", "followers", "participants", "overrides", "ai_cache", "draws", "audit_log"];
 const CHUNK = 300;
 
+// Same tables and indexes as the local database, including columns added by later migrations.
+const ddl = await local.execute("SELECT sql FROM sqlite_master WHERE type IN ('table', 'index') AND sql IS NOT NULL AND name NOT LIKE 'sqlite_%'");
+for (const row of ddl.rows) {
+  await remote.execute(String(row.sql).replace(/^CREATE (TABLE|INDEX) (?!IF NOT EXISTS)/, "CREATE $1 IF NOT EXISTS "));
+}
+
 for (const table of TABLES) {
   const remoteCols = new Set((await remote.execute(`PRAGMA table_info(${table})`)).rows.map((r) => r.name));
   if (!remoteCols.size) {
-    console.error(`Table ${table} doesn't exist in Turso yet. Open the deployed app once, then run this again.`);
+    console.error(`Table ${table} couldn't be created in Turso.`);
     process.exit(1);
   }
   const rs = await local.execute(`SELECT * FROM ${table}`);
