@@ -87,11 +87,15 @@ export default function Home() {
           <h1 className="font-display text-6xl leading-[0.92] sm:text-7xl">
             Pick the winners
             <br />
-            the <span className="shimmer-text">Manjappada</span> trusts
+            the <span className="shimmer-text">KBFC</span> trusts
           </h1>
-          <p className="mt-5 max-w-md text-white/75">
-            Every comment checked against your contest rules - tags, follows, score predictions - then a draw anyone can verify.
-          </p>
+          <div className="mt-6 flex items-center gap-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logos/kbfc.png" alt="Kerala Blasters FC" className="h-24 w-auto drop-shadow-[0_8px_16px_rgb(0_0_0/0.35)]" />
+            <span className="font-display text-4xl text-kbfc-yellow" aria-label="in partnership with">×</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logos/ofioh-sporty.png" alt="Ofioh Sporty" className="h-16 w-auto" />
+          </div>
           <ul className="mt-6 flex flex-wrap gap-2 text-sm font-medium">
             {["Every comment checked", "Score predictions read", "Verifiable draw"].map((t) => (
               <li key={t} className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/15">
